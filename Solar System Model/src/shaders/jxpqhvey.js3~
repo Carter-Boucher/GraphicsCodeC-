@@ -1,0 +1,45 @@
+#version 330 core
+
+in vec3 fragPos;      // Fragment position in world space (from vertex shader)
+in vec3 normal;       // Normal vector in world space (from vertex shader)
+in vec2 texCoords;    // Texture coordinates (from vertex shader)
+
+out vec4 FragColor;   // Final color output
+
+uniform vec3 lightPosition;   // Light position in world space
+uniform vec3 viewPosition;    // Camera/viewer position in world space
+uniform sampler2D texture1;   // Diffuse texture
+
+void main()
+{
+    // Material properties
+    vec3 ambientColor = vec3(0.1, 0.1, 0.1); // Ambient color (can be tuned)
+    vec3 diffuseColor = texture(texture1, texCoords).rgb; // Diffuse color from texture
+    vec3 specularColor = vec3(1.0, 1.0, 1.0); // Specular highlight color
+    float shininess = 256.0; // Shininess factor for specular highlights
+
+    // Light properties
+    vec3 lightColor = vec3(1.0, 1.0, 1.0); // White light
+
+    // Ambient component
+    vec3 ambient = ambientColor * lightColor;
+
+    // Diffuse component
+    vec3 norm = normalize(normal);                // Ensure the normal is normalized
+    vec3 lightDir = normalize(lightPosition - fragPos); // Direction to light source
+    float diff = max(dot(norm, lightDir), 0.0);   // Lambertian diffuse term
+    vec3 diffuse = diff * diffuseColor * lightColor;
+
+    // Specular component
+    vec3 viewDir = normalize(viewPosition - fragPos); // Direction to viewer
+    vec3 reflectDir = reflect(-lightDir, norm);       // Reflected light direction
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
+    vec3 specular = spec * specularColor * lightColor;
+
+    // Combine components
+    vec3 result = ambient + diffuse + specular;
+    FragColor = vec4(result, 1.0); // Final fragment color
+	//visualize light direction
+	//FragColor = vec4(normalize(lightDir) * 0.5 + 0.5, 1.0);
+	//FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+}

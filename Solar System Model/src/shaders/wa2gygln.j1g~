@@ -1,0 +1,25 @@
+#version 330 core
+
+layout(location = 0) in vec3 position;   // Vertex position
+layout(location = 1) in vec3 normal;     // Vertex normal
+layout(location = 2) in vec2 texCoords; // Texture coordinates
+
+out vec3 fragPos;       // Fragment position in world space
+out vec3 normalOut;     // Normal vector in world space
+out vec2 texCoordsOut;  // Texture coordinates
+
+uniform mat4 M; // Model matrix
+uniform mat4 V; // View matrix
+uniform mat4 P; // Projection matrix
+
+void main()
+{
+    // Transform the vertex position to clip space
+    gl_Position = P * V * M * vec4(position, 1.0);
+
+    // Pass world-space data to the fragment shader
+    fragPos = vec3(M * vec4(position, 1.0)); // Transform to world space
+	//normalOut = normal;
+    normalOut = mat3(transpose(inverse(M))) * normal; // Correctly transform normals
+    texCoordsOut = texCoords; // Pass through texture coordinates
+}
